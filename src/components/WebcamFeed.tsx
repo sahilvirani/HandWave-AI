@@ -23,7 +23,14 @@ const WebcamFeed: React.FC<Props> = ({ width = 640, height = 480, onFrame }) => 
         const canvas = canvasRef.current;
         if (video && canvas) {
           const ctx = canvas.getContext('2d')!;
+          
+          // Mirror the image so it feels natural
+          ctx.save();
+          ctx.scale(-1, 1);
+          ctx.translate(-width, 0);
           ctx.drawImage(video, 0, 0, width, height);
+          ctx.restore();
+          
           onFrame?.(ctx);
         }
         requestAnimationFrame(render);

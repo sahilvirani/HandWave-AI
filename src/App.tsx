@@ -14,17 +14,23 @@ function App() {
         'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
       );
       (window as any).handLandmarker = await HandLandmarker.createFromOptions(fileset, {
-        baseOptions: { modelAssetPath: undefined }, // default lite model
-        runningMode: 'IMAGE'
+        baseOptions: { 
+          modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/int8/1/hand_landmarker.task'
+        },
+        runningMode: 'IMAGE',
+        numHands: 2
       });
     }
 
     const handLandmarker: HandLandmarker = (window as any).handLandmarker;
-    const imageBitmap = await createImageBitmap(ctx.canvas);
+    const bitmap = await createImageBitmap(ctx.canvas);
 
-    const results: HandLandmarkerResult = handLandmarker.detect(imageBitmap);
+    const results: HandLandmarkerResult = handLandmarker.detect(bitmap);
+    bitmap.close(); // free memory
+    
     if (results.landmarks.length) {
-      console.log('Hands:', results.landmarks);
+      console.log('Hands detected:', results.landmarks.length);
+      console.log('Hand landmarks:', results.landmarks);
     }
   }, []);
 
