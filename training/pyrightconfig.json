@@ -1,0 +1,13 @@
+{
+    "venvPath": ".",
+    "venv": ".venv",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.autoSearchPaths": true,
+    "python.analysis.useLibraryCodeForTypes": true,
+    "typeCheckingMode": "basic",
+    "reportMissingImports": false,
+    "reportMissingModuleSource": false,
+    "extraPaths": [
+        "./.venv/lib/python3.11/site-packages"
+    ]
+} 
