@@ -1,0 +1,197 @@
+project:
+  name: "HandWave AI"
+  description: "Real-time ASL (American Sign Language) to speech translator web app"
+  goals:
+    - "Use a webcam to recognize ASL hand gestures and translate them into text and speech"
+    - "Implement with minimal cost (client-side ML with TensorFlow.js, AWS free-tier for any cloud services)"
+    - "Demonstrate full-stack skills: front-end (React+TS), ML modeling, back-end (AWS Lambda, SQL DB), and DevOps (Docker, CI/CD, PWA)"
+  tech_stack:
+    frontend: ["React", "TypeScript", "TensorFlow.js", "MediaPipe Hands (hand landmark model)", "Web Speech API (TTS)", "HTML/CSS", "PWA (service workers, manifest)"]
+    backend: ["Node.js", "Express (for dev)", "AWS Lambda (for deployment)", "AWS API Gateway or Lambda URL", "SQLite (dev DB)", "AWS RDS or Aurora (potential prod DB)", "SQL"]
+    cloud: ["AWS S3 (static site & model hosting)", "AWS Lambda (serverless functions)", "AWS API Gateway", "AWS CloudFront (CDN for front-end)", "Route53 (DNS for domain)"]
+    devops: ["Docker (for ML training environment)", "GitHub Actions (CI/CD pipelines)", "TensorFlow (Python for model training)", "tensorflowjs-converter (model conversion)"]
+  features:
+    - "Real-time hand sign recognition (ASL alphabet) via webcam"
+    - "Text output of recognized signs, forming words and sentences"
+    - "Automatic insertion of space when signer pauses (no hand) to separate words"
+    - "Gesture-based deletion (e.g., show two hands to backspace last letter)"
+    - "Text-to-Speech output of the transcribed text (speaks words as they are signed)"
+    - "User can train custom signs (few-shot learning for new gestures)"
+    - "Mobile-friendly and installable as a Progressive Web App (offline capable)"
+    - "Logging of usage data to a backend (demonstrating SQL integration)"
+    - "Multilingual speech output (scalable idea for future: translate text to other languages before speech)"
+  sprints:
+    - number: 1
+      title: "Project Setup"
+      tasks:
+        - "Initialize React app (TypeScript, PWA template) and set up repository"
+        - "Install TensorFlow.js and other dependencies"
+        - "Verify app runs (Hello world) and set up basic CI workflow"
+      prompts:
+        - "npx create-react-app HandWaveAI --template cra-template-pwa-typescript"
+        - "npm install @tensorflow/tfjs @mediapipe/tasks-vision"
+        - "git init & git commit initial project scaffold"
+        - "Create GitHub Actions workflow to build the app on push"
+    - number: 2
+      title: "Webcam Integration"
+      tasks:
+        - "Add video element and request webcam access using getUserMedia"
+        - "Stream webcam feed to the video element in the React component"
+        - "Handle permission errors and ensure responsive video display"
+      prompts:
+        - "Add <video> to App component with autoplay and muted attributes"
+        - "Use navigator.mediaDevices.getUserMedia({ video: true }) to get stream and set video.srcObject"
+        - "Console log or display error if camera access is denied"
+    - number: 3
+      title: "Hand Landmark Detection"
+      tasks:
+        - "Integrate MediaPipe Hands to get 21 hand keypoints from video frames"
+        - "Load the hand landmark model and set up a detection loop (e.g., 10fps)"
+        - "Draw or log landmark points to verify hand tracking works"
+      prompts:
+        - "Import and initialize HandLandmarker from @mediapipe/tasks-vision with modelAssetPath 'hand_landmarker.task'"
+        - "Use requestAnimationFrame to continuously process video frames through handLandmarker.detect()"
+        - "If hand is detected, draw keypoint circles on a canvas overlay or log coordinates"
+    - number: 4
+      title: "Model Training Preparation"
+      tasks:
+        - "Prepare dataset of ASL alphabet images (Kaggle ASL Alphabet dataset)"
+        - "Write Python script to extract hand keypoints from images using MediaPipe"
+        - "Save processed keypoint data and labels for model training"
+      prompts:
+        - "Load ASL Alphabet dataset images and run MediaPipe Hands to get 21 (x,y) points per image"
+        - "Normalize keypoints (scale/translate) and save features with labels (A-Z minus J,Z) to CSV or NumPy"
+        - "Split data into train/validation sets for modeling"
+    - number: 5
+      title: "Train Sign Classification Model"
+      tasks:
+        - "Define a neural network model to classify hand keypoints into letters"
+        - "Train the model using TensorFlow (Keras) on the processed dataset"
+        - "Evaluate accuracy and adjust hyperparameters if needed"
+        - "Convert the trained model to TensorFlow.js format"
+      prompts:
+        - "Build a Keras Sequential model with input shape 42 and output 24 (classes), with 2 hidden Dense layers"
+        - "Train model on keypoint data (e.g., 20 epochs, use Adam optimizer, monitor val accuracy)"
+        - "Use tensorflowjs_converter to convert saved model to TF.js model.json and weights"
+    - number: 6
+      title: "Integrate ML Model in Frontend"
+      tasks:
+        - "Load the TensorFlow.js model in the React app"
+        - "Use model to predict letters from hand landmark data in real-time"
+        - "Display the predicted letter on the UI"
+        - "Implement logic to form words from continuous letter predictions"
+      prompts:
+        - "Use tf.loadLayersModel('model/model.json') to load the trained model in the browser"
+        - "For each set of detected keypoints, flatten and feed into model.predict() to get predicted letter"
+        - "Maintain state for output text; append new letters to current word"
+        - "If no hand detected for a short interval, append a space to conclude the current word"
+    - number: 7
+      title: "Text-to-Speech Output"
+      tasks:
+        - "Enable speaking of the translated text using Web Speech API"
+        - "Speak each completed word or full sentence via SpeechSynthesisUtterance"
+        - "Allow selection of voice/language (optional for future multi-language support)"
+      prompts:
+        - "On word completion (when a space is added), create a SpeechSynthesisUtterance for that word and call speechSynthesis.speak()"
+        - "Ensure the app only speaks when there is something to speak (avoid speaking every letter)"
+        - "Optionally add a dropdown of speechSynthesis.getVoices() to let user choose a voice"
+    - number: 8
+      title: "Backend API & Database (SQL) Setup"
+      tasks:
+        - "Create a simple Node.js/Express backend (or Lambda function) to log usage"
+        - "Use SQLite (dev) or AWS RDS (prod) to store translation logs or counts"
+        - "Implement an endpoint to increment and retrieve a translation count"
+      prompts:
+        - "Set up Express server with a /log endpoint that inserts a new record (e.g., increment counter in SQLite)"
+        - "Initialize SQLite DB with a table for usage_stats (columns: id, count)"
+        - "POST /log: increment count and respond with new total; GET /stats: return total count"
+    - number: 9
+      title: "Frontend-Backend Integration"
+      tasks:
+        - "Call the backend API from the React app when appropriate (e.g., after speaking a word)"
+        - "Update UI with data from backend (like total translations count)"
+        - "Ensure CORS is configured for local and production domains"
+      prompts:
+        - "Use fetch() in the front-end to POST to /log endpoint each time a word is translated (include word or just trigger count)"
+        - "Display the returned total count on the UI (e.g., 'Total translations: X')"
+        - "Enable CORS in Express or API Gateway for the front-end origin"
+    - number: 10
+      title: "Dockerize Training Pipeline"
+      tasks:
+        - "Create Dockerfile to containerize the model training code"
+        - "Include all dependencies (TensorFlow, Mediapipe, etc.) in the container"
+        - "Document how to run the container to retrain the model"
+      prompts:
+        - "Write Dockerfile FROM tensorflow/tensorflow:latest and COPY the training script and dataset in"
+        - "RUN pip install mediapipe, tensorflowjs, etc., then CMD to run training script"
+        - "Test building the image and running it to ensure it outputs model files"
+    - number: 11
+      title: "CI/CD Automation"
+      tasks:
+        - "Set up GitHub Actions for continuous integration"
+        - "Automate testing and building the React app"
+        - "Automate deployment to AWS (S3 for front-end, Lambda for back-end)"
+      prompts:
+        - "Create .github/workflows/main.yml: on push, run build for front-end and backend"
+        - "Add step to deploy front-end: use AWS CLI to sync build/ to S3 bucket"
+        - "Add step to zip backend code and update AWS Lambda via aws CLI or use Serverless deploy"
+        - "Use GitHub Secrets for AWS credentials"
+    - number: 12
+      title: "Deploy & Domain Config"
+      tasks:
+        - "Deploy front-end to S3/CloudFront and backend to AWS API (Lambda)"
+        - "Configure custom domain (Route 53) and SSL certificate for the front-end"
+        - "Update front-end config to use production API URL"
+        - "Verify the app is accessible at the domain with HTTPS"
+      prompts:
+        - "Create S3 bucket for site and enable static hosting (or use CloudFront for HTTPS). Upload build files."
+        - "Set up CloudFront distro pointing to S3, attach ACM SSL cert for custom domain"
+        - "Point domain DNS to CloudFront (Alias in Route 53)"
+        - "Deploy Lambda through AWS Console or CLI and note the endpoint (API Gateway URL or Lambda Function URL), update React app to use it"
+    - number: 13
+      title: "UI/UX Polish"
+      tasks:
+        - "Improve styling of the app (layout, colors, fonts) for a professional look"
+        - "Add helpful UI text/instructions for users"
+        - "Add visual indicators (e.g., hand detected or not, recording status)"
+        - "Ensure mobile responsiveness"
+      prompts:
+        - "Use Tailwind CSS or custom CSS to style the video container and text output (e.g., center content, nice font for output text)"
+        - "Add a header/title and an instruction panel describing how to use the app"
+        - "Implement a status light (green when a hand is detected, grey when not) to give user feedback"
+        - "Test layout on mobile screen sizes and adjust CSS for responsiveness"
+    - number: 14
+      title: "PWA & Offline Support"
+      tasks:
+        - "Finalize PWA manifest with icons and metadata"
+        - "Implement service worker for offline caching of app assets and model"
+        - "Test app installation on mobile and offline functionality"
+      prompts:
+        - "Add/verify manifest.json with correct name, icons (192x192, 512x512), start_url and display=standalone"
+        - "Register a service worker that caches the core files (HTML, JS, CSS, model.json, model weights) using Workbox or manual caching"
+        - "After first load, test that turning off network still allows the app to load and the model to run"
+        - "On Chrome devtools, use Lighthouse PWA audit to ensure it's installable and passes criteria"
+    - number: 15
+      title: "Custom Sign Training Feature"
+      tasks:
+        - "Provide UI for user to record a custom gesture and label it"
+        - "Capture a few samples of the gesture's keypoints"
+        - "Implement a simple matching algorithm to recognize the custom gesture in the detection loop"
+        - "If custom gesture is recognized, output its associated phrase instead of a letter"
+      prompts:
+        - "Add a form (input and button) to create a new custom sign with a text label"
+        - "On button press, capture current hand keypoints and store them as samples for that label (allow multiple captures)"
+        - "Modify detection logic: check current landmarks against each custom sign samples (e.g., compute Euclidean distance); if close match, set output to the custom label (and perhaps treat it as a whole word)."
+        - "Test with a simple custom sign to ensure it overrides letter predictions when performed"
+    - number: 16
+      title: "Final Testing & Documentation"
+      tasks:
+        - "Perform end-to-end tests for all features (on different browsers/devices)"
+        - "Fix any critical bugs or performance issues observed"
+        - "Write comprehensive documentation (README) explaining project setup, usage, and architecture"
+        - "Review cost model to ensure usage stays within free or <$20 limits"
+      prompts:
+        - "Test the application in Chrome, Firefox, Safari and on mobile devices; ensure webcam, ML, and audio all work consistently"
+        - "Monitor performance (CPU/memory) in browser; if needed, lower detection frequency or optimize code"
+        - "Draft the README with sections: Introduction, Features, Tech Stack, Setup Instructions, Usage Guide, and Future Work"
+        - "Summarize how each tech was used (React for UI, TF.js for ML, AWS for hosting, SQL for data, etc.) as a highlight for resume readers"

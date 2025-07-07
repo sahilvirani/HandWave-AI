@@ -37,3 +37,54 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+
+# -----------------------------------------------
+# Additional ignore patterns (added Sprint 4 clean-up)
+# -----------------------------------------------
+
+# Local environment & secrets
+.env
+.env.*
+*.env
+
+# npm & yarn config overrides
+.npmrc
+.yarnrc
+
+# MacOS Spotlight and build artifacts
+/.Spotlight-V100
+/.Trashes
+
+# Dataset and training artifacts (large files)
+training/data/
+training/*.csv
+training/*.npz
+training/*.npy
+
+# Model artifacts generated after training
+model/
+models/
+*.h5
+*.ckpt
+*.pb
+
+# Parcel/Webpack caches
+.parcel-cache
+.cache/
+
+# Logs
+*.log
+
+# Docker artifacts
+*.qcow2
+
+# Coverage output
+coverage/
+
+# Other OS files
+Icon?
+
+# End of additional patterns
+
+# Ignore nested duplicate repo
+handwave-ai/
